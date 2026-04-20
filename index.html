@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Laboratorium Jaring-Jaring Bangun Ruang</title>
+    <!-- Menggunakan Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat Three.js dan OrbitControls untuk simulasi 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <style>
+        /* Styling khusus untuk slider agar lebih ramah anak */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 5px;
+        }
+        /* Penyesuaian slider untuk Papan Interaktif (layar sangat besar) */
+        @media (min-width: 1536px) {
+            input[type=range]::-webkit-slider-thumb {
+                height: 40px;
+                width: 40px;
+                margin-top: -12px;
+            }
+            input[type=range]::-webkit-slider-runnable-track {
+                height: 16px;
+            }
+        }
+        /* Sembunyikan scrollbar untuk menu horizontal di HP */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Efek transisi untuk tombol */
+        .shape-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .shape-btn:hover {
+            transform: translateY(-2px);
+        }
+        .shape-btn:active {
+            transform: translateY(1px);
+        }
+        .shape-btn.active {
+            ring: 4px;
+            ring-offset: 2px;
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Animasi Mengambang untuk Cover */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        @keyframes float-fast {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(-5deg); }
+        }
+        .animate-float-slow { animation: float-slow 5s ease-in-out infinite; }
+        .animate-float-fast { animation: float-fast 3.5s ease-in-out infinite; }
+    </style>
+</head>
+<body class="flex flex-col-reverse md:flex-row h-[100dvh] w-screen overflow-hidden bg-slate-50 font-sans text-slate-800 selection:bg-indigo-200">
+    
+    <!-- ================= COVER PAGE ================= -->
+    <div id="cover-page" class="fixed inset-0 z-50 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-700">
+        <!-- Elemen Dekoratif Mengambang -->
+        <div class="absolute top-10 left-10 md:top-20 md:left-20 text-6xl md:text-8xl opacity-30 animate-float-slow">🔺</div>
+        <div class="absolute bottom-20 left-10 md:bottom-32 md:left-32 text-6xl md:text-8xl opacity-30 animate-float-fast">📦</div>
+        <div class="absolute top-20 right-10 md:top-32 md:right-32 text-6xl md:text-9xl opacity-30 animate-float-slow" style="animation-delay: 1s;">🛢️</div>
+        <div class="absolute bottom-10 right-10 md:bottom-20 md:right-20 text-6xl md:text-8xl opacity-30 animate-float-fast" style="animation-delay: 0.5s;">⭐</div>
+        
+        <!-- Konten Utama Cover -->
+        <div class="relative z-10 text-center px-4 flex flex-col items-center w-full max-w-5xl">
+            
+            <!-- Judul -->
+            <h1 class="text-6xl md:text-8xl 2xl:text-[10rem] font-black text-white mb-2 drop-shadow-[0_5px_5px_rgba(0,0,0,0.4)] tracking-tight">
+                <span class="text-yellow-300">GEO</span>LAB <span class="text-cyan-300">PRIMA</span>
+            </h1>
+            <p class="text-lg md:text-2xl 2xl:text-4xl text-white/90 font-bold mb-8 md:mb-12 drop-shadow-md bg-black/10 px-6 py-2 rounded-full backdrop-blur-sm border border-white/10">
+                Laboratorium Jaring-Jaring Bangun Ruang
+            </p>
+            
+            <!-- Ilustrasi Bangun Ruang (Prisma & Tabung) -->
+            <div class="flex justify-center items-end gap-3 md:gap-8 mb-10 md:mb-16 w-full">
+                <div class="w-20 h-20 md:w-32 md:h-32 2xl:w-40 2xl:h-40 bg-white/20 backdrop-blur-md rounded-2xl border-4 border-white/50 flex items-center justify-center text-4xl md:text-6xl 2xl:text-8xl shadow-2xl transform -rotate-12 hover:rotate-0 hover:scale-110 transition-all cursor-default">🔺</div>
+                <div class="w-24 h-24 md:w-40 md:h-40 2xl:w-48 2xl:h-48 bg-white/20 backdrop-blur-md rounded-full border-4 border-white/50 flex items-center justify-center text-5xl md:text-8xl 2xl:text-9xl shadow-2xl transform hover:-translate-y-4 hover:scale-110 transition-all cursor-default z-10">🛢️</div>
+                <div class="w-20 h-20 md:w-32 md:h-32 2xl:w-40 2xl:h-40 bg-white/20 backdrop-blur-md rounded-2xl border-4 border-white/50 flex items-center justify-center text-4xl md:text-6xl 2xl:text-8xl shadow-2xl transform rotate-12 hover:rotate-0 hover:scale-110 transition-all cursor-default">📦</div>
+            </div>
+
+            <!-- Pembuat -->
+            <div class="mb-10 md:mb-16 inline-block bg-black/25 backdrop-blur-sm px-6 md:px-8 py-3 rounded-full border border-white/20 shadow-lg">
+                <p class="text-white text-sm md:text-xl 2xl:text-3xl font-medium tracking-wide">
+                    created by: <span class="font-bold text-yellow-300">Theresia Sri Rahayu</span>
+                </p>
+            </div>
+
+            <!-- Tombol Masuk -->
+            <button id="enter-lab-btn" class="group relative px-8 py-4 md:px-12 md:py-5 2xl:px-16 2xl:py-6 bg-white text-purple-600 font-black text-xl md:text-3xl 2xl:text-5xl rounded-full overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,255,255,0.4)] hover:-translate-y-2 active:translate-y-1 transition-all duration-300 transform scale-100 hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-r from-yellow-300 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                <span class="relative flex items-center gap-3">
+                    <span class="group-hover:animate-bounce">🚀</span> Masuk Lab Sekarang!
+                </span>
+            </button>
+        </div>
+    </div>
+    <!-- ================= END COVER PAGE ================= -->
+
+    <!-- Panel Kontrol (Sidebar di Bawah pada HP, Kiri pada Desktop) -->
+    <div class="w-full md:w-80 lg:w-96 2xl:w-[450px] bg-white shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] md:shadow-2xl z-20 flex flex-col p-4 md:p-6 2xl:p-10 shrink-0 h-[45dvh] md:h-full rounded-t-3xl md:rounded-none transition-all">
+        <div class="mb-3 md:mb-6 shrink-0">
+            <h1 class="text-xl md:text-2xl 2xl:text-4xl font-black text-indigo-600 mb-1 flex items-center gap-2">
+                <span class="text-2xl md:text-3xl 2xl:text-5xl">📐</span> GEOLAB PRIMA
+            </h1>
+            <p class="text-xs md:text-sm 2xl:text-lg text-slate-500 font-medium hidden md:block">Pilih bangun ruang untuk melihat dan melipat jaring-jaringnya!</p>
+        </div>
+
+        <!-- Tombol Pilihan Bangun Ruang (Horizontal Scroll di HP) -->
+        <div id="shape-buttons" class="flex flex-row md:flex-col gap-2 md:gap-3 mb-3 md:mb-6 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 snap-x hide-scrollbar flex-1 items-center md:items-stretch">
+            <!-- Tombol akan dibuat melalui JavaScript -->
+        </div>
+
+        <!-- Kontrol Lipatan -->
+        <div class="mt-auto pt-3 md:pt-4 border-t border-slate-100 bg-white shrink-0">
+            <div class="flex justify-between items-center mb-2 md:mb-3">
+                <label class="font-bold text-slate-700 text-sm md:text-base 2xl:text-2xl">Lipat Bangun Ruang</label>
+                <span id="fold-percentage" class="text-indigo-600 font-black text-base md:text-lg 2xl:text-3xl">0%</span>
+            </div>
+            <input type="range" id="fold-slider" min="0" max="1" step="0.01" value="0" class="mb-3 md:mb-5 focus:outline-none 2xl:h-4">
+            
+            <button id="autoplay-btn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 md:py-3 2xl:py-5 px-4 rounded-xl md:rounded-2xl shadow-lg transition-colors flex items-center justify-center gap-2 active:scale-95 2xl:text-2xl 2xl:rounded-3xl">
+                <span id="autoplay-icon" class="2xl:text-3xl">▶️</span> 
+                <span id="autoplay-text">Mainkan Otomatis</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Area Kanvas 3D (Di Atas pada HP, Kanan pada Desktop) -->
+    <div class="flex-1 relative h-[55dvh] md:h-full w-full bg-gradient-to-br from-indigo-50 to-blue-100 touch-none">
+        <!-- Petunjuk Interaksi -->
+        <div class="absolute top-4 left-0 right-0 flex justify-center pointer-events-none z-10">
+            <div class="bg-white/90 backdrop-blur-sm px-4 md:px-5 py-2 md:py-2.5 rounded-full shadow-md text-xs md:text-sm font-bold text-slate-600 flex items-center gap-2 border border-slate-200/50 2xl:text-xl 2xl:px-8 2xl:py-4">
+                👆 Sentuh dan geser untuk memutar
+            </div>
+        </div>
+        <!-- Wadah Rendering Three.js -->
+        <div id="canvas-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+    </div>
+
+    <script>
+        // --- DATA BANGUN RUANG ---
+        const shapes = [
+            { id: 'segitiga', name: 'Prisma Segitiga', icon: '🔺', color: 'bg-red-500', ring: 'ring-red-400' },
+            { id: 'segiempat', name: 'Prisma Segi Empat (Balok)', icon: '📦', color: 'bg-amber-500', ring: 'ring-amber-400' },
+            { id: 'segilima', name: 'Prisma Segi Lima', icon: '⭐', color: 'bg-green-500', ring: 'ring-green-400' },
+            { id: 'segienam', name: 'Prisma Segi Enam', icon: '🛑', color: 'bg-blue-500', ring: 'ring-blue-400' },
+            { id: 'tabung', name: 'Tabung', icon: '🛢️', color: 'bg-purple-500', ring: 'ring-purple-400' }
+        ];
+
+        // Palet warna pastel ceria untuk jaring-jaring
+        const faceColors = [0xFF595E, 0xFFCA3A, 0x8AC926, 0x1982C4, 0x6A4C93, 0xFC7A1E];
+
+        // --- STATE APLIKASI ---
+        let currentShapeId = 'segitiga';
+        let foldProgress = 0;
+        let lastFoldProgress = 0; // State untuk melacak kapan suara lipatan harus dimainkan
+        let isAutoPlaying = false;
+        let autoPlayDirection = 1;
+
+        // Referensi Objek 3D
+        let scene, camera, renderer, controls;
+        let mainGroup; // Wadah utama untuk seluruh jaring
+        let lateralPivots = []; // Poros lipatan sisi tegak
+        let topPivot, bottomPivot; // Poros lipatan alas dan tutup
+        let currentGeometryParams = { n: 3 };
+
+        // Elemen DOM
+        const slider = document.getElementById('fold-slider');
+        const percentageText = document.getElementById('fold-percentage');
+        const autoplayBtn = document.getElementById('autoplay-btn');
+        const autoplayIcon = document.getElementById('autoplay-icon');
+        const autoplayText = document.getElementById('autoplay-text');
+        const shapeButtonsContainer = document.getElementById('shape-buttons');
+
+        // --- SISTEM SUARA (WEB AUDIO API) ---
+        let audioCtx;
+
+        function initAudio() {
+            // Inisialisasi AudioContext hanya setelah pengguna berinteraksi (Aturan Browser)
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type, param = 0) {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+
+            if (type === 'masuk') {
+                // Suara transisi masuk lab (whoosh up yang ceria)
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(300, now);
+                oscillator.frequency.exponentialRampToValueAtTime(1000, now + 0.4);
+                gainNode.gain.setValueAtTime(0.4, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                oscillator.start(now);
+                oscillator.stop(now + 0.4);
+            } else if (type === 'klik') {
+                // Suara pop ceria saat memilih bangun
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(300, now);
+                oscillator.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+                gainNode.gain.setValueAtTime(0.3, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                oscillator.start(now);
+                oscillator.stop(now + 0.1);
+            } else if (type === 'lipat') {
+                // Suara 'krek' mekanik halus saat jaring melipat/membuka
+                oscillator.type = 'sine';
+                // Pitch menyesuaikan progres lipatan (makin tinggi bunyinya saat tertutup rapat)
+                const freq = 250 + (param * 400);
+                oscillator.frequency.setValueAtTime(freq, now);
+                gainNode.gain.setValueAtTime(0.05, now); // Volume pelan agar nyaman
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                oscillator.start(now);
+                oscillator.stop(now + 0.05);
+            } else if (type === 'tombol') {
+                // Suara klik standar untuk tombol play/pause
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(param ? 600 : 400, now); // Nada beda untuk play/pause
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                oscillator.start(now);
+                oscillator.stop(now + 0.1);
+            }
+        }
+
+        // --- INISIALISASI UI ---
+        function initUI() {
+            shapes.forEach(shape => {
+                const btn = document.createElement('button');
+                // Mengubah class tombol agar responsif (Card horizontal di HP, Block vertikal di Desktop)
+                btn.className = `shape-btn flex items-center gap-2 md:gap-3 p-2 md:p-3 2xl:p-5 rounded-xl 2xl:rounded-2xl text-left font-bold text-white shadow-sm ${shape.color} hover:brightness-110 shrink-0 w-[160px] md:w-full snap-center 2xl:text-2xl`;
+                btn.innerHTML = `<span class="text-xl md:text-2xl 2xl:text-4xl">${shape.icon}</span> <span class="text-sm md:text-lg 2xl:text-2xl leading-tight">${shape.name}</span>`;
+                btn.onclick = () => {
+                    initAudio(); // Pastikan audio aktif
+                    playSound('klik'); // Mainkan suara pop
+                    selectShape(shape.id, btn, shape.ring);
+                };
+                shapeButtonsContainer.appendChild(btn);
+
+                // Tandai yang pertama aktif
+                if (shape.id === currentShapeId) {
+                    btn.classList.add('active', 'ring-4', shape.ring);
+                }
+            });
+
+            slider.addEventListener('input', (e) => {
+                initAudio(); // Nyalakan mesin audio saat digeser
+                isAutoPlaying = false;
+                updateAutoPlayUI();
+                foldProgress = parseFloat(e.target.value);
+                applyFold(foldProgress);
+            });
+
+            autoplayBtn.addEventListener('click', () => {
+                initAudio();
+                isAutoPlaying = !isAutoPlaying;
+                playSound('tombol', isAutoPlaying); // Mainkan suara saat play/pause
+                updateAutoPlayUI();
+            });
+        }
+
+        function selectShape(id, btnElement, ringClass) {
+            currentShapeId = id;
+            isAutoPlaying = false;
+            foldProgress = 0;
+            slider.value = 0;
+            applyFold(0);
+            updateAutoPlayUI();
+
+            // Update styling tombol
+            document.querySelectorAll('.shape-btn').forEach(btn => {
+                btn.className = btn.className.replace(/active ring-4 ring-\w+-400/g, '');
+            });
+            btnElement.classList.add('active', 'ring-4', ringClass);
+
+            build3DShape(id);
+        }
+
+        function updateAutoPlayUI() {
+            if (isAutoPlaying) {
+                autoplayBtn.classList.replace('bg-indigo-500', 'bg-red-500');
+                autoplayBtn.classList.replace('hover:bg-indigo-600', 'hover:bg-red-600');
+                autoplayIcon.textContent = '⏸️';
+                autoplayText.textContent = 'Jeda';
+            } else {
+                autoplayBtn.classList.replace('bg-red-500', 'bg-indigo-500');
+                autoplayBtn.classList.replace('hover:bg-red-600', 'hover:bg-indigo-600');
+                autoplayIcon.textContent = '▶️';
+                autoplayText.textContent = 'Mainkan Otomatis';
+            }
+        }
+
+        function formatPercentage(val) {
+            return Math.round(val * 100) + '%';
+        }
+
+        // --- INISIALISASI THREE.JS ---
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            
+            // Scene
+            scene = new THREE.Scene();
+            
+            // Kamera
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, -5, 25); // Posisi melihat ke bidang XY dari arah Z
+            updateCameraForScreen(); // Sesuaikan FOV berdasarkan rasio layar
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Pencahayaan yang ramah anak (Terang & Lembut)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+            dirLight.position.set(10, 10, 20);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // Orbit Controls untuk memutar
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enablePan = true;
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+
+            window.addEventListener('resize', onWindowResize);
+
+            // Buat bangun pertama
+            build3DShape(currentShapeId);
+            
+            // Mulai loop animasi
+            animate();
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            updateCameraForScreen(); // Update FOV saat layar di-resize atau diputar orientasi
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // Fungsi menyesuaikan kamera agar objek tidak terpotong di HP (Portrait)
+        function updateCameraForScreen() {
+            const container = document.getElementById('canvas-container');
+            const aspect = container.clientWidth / container.clientHeight;
+            if (aspect < 1) {
+                camera.fov = 65; // FOV lebih luas untuk HP (Portrait) agar jaring-jaring muat
+            } else {
+                camera.fov = 45; // FOV normal untuk Laptop/Tablet/Papan Interaktif (Landscape)
+            }
+        }
+
+        // Fungsi Pembuat Bentuk Dasar Poligon
+        function createBaseShape(n, r) {
+            const shape = new THREE.Shape();
+            // Membuat poligon beraturan. Menyesuaikan sudut awal agar 
+            // sisi bawah (edge 0) selalu mendatar untuk mempermudah penyambungan.
+            const startAngle = -Math.PI / 2 - Math.PI / n;
+            for (let j = 0; j <= n; j++) {
+                const angle = startAngle + j * (2 * Math.PI / n);
+                const x = r * Math.cos(angle);
+                const y = r * Math.sin(angle);
+                if (j === 0) shape.moveTo(x, y);
+                else shape.lineTo(x, y);
+            }
+            return shape;
+        }
+
+        // --- FUNGSI MEMBANGUN JARING-JARING ---
+        function build3DShape(type) {
+            // Bersihkan objek sebelumnya
+            if (mainGroup) {
+                scene.remove(mainGroup);
+            }
+
+            mainGroup = new THREE.Group();
+            lateralPivots = [];
+
+            // Parameter dasar
+            let n = 3; // Jumlah sisi
+            let r = 2.5; // Jari-jari alas
+            let h = 5; // Tinggi prisma
+
+            switch (type) {
+                case 'segitiga': n = 3; r = 2.8; h = 6; break;
+                case 'segiempat': n = 4; r = Math.sqrt(8); h = 4; break; // Membentuk balok/kubus (sisi=4)
+                case 'segilima': n = 5; r = 2.2; h = 5; break;
+                case 'segienam': n = 6; r = 2.0; h = 5; break;
+                case 'tabung': n = 32; r = 2.0; h = 6; break; // Tabung dilunakkan menjadi 32 segi
+            }
+
+            currentGeometryParams.n = n;
+
+            // Kalkulasi matematika bentuk
+            // Lebar satu sisi (s) dan jarak dari pusat ke sisi (apotema/a)
+            let s = 2 * r * Math.sin(Math.PI / n);
+            let a = r * Math.cos(Math.PI / n);
+
+            // Modifikasi khusus tabung agar keliling melingkar sempurna
+            if (type === 'tabung') {
+                s = (2 * Math.PI * r) / n;
+                a = r;
+            }
+
+            // Material dengan flat shading untuk tampilan seperti kertas
+            const materials = faceColors.map(colorHex => 
+                new THREE.MeshStandardMaterial({ 
+                    color: colorHex, 
+                    side: THREE.DoubleSide, 
+                    roughness: 0.8,
+                    flatShading: true
+                })
+            );
+
+            // Material khusus tabung (Satu warna untuk selimut, satu untuk alas)
+            const cylinderBodyMat = new THREE.MeshStandardMaterial({ color: 0x38BDF8, side: THREE.DoubleSide, roughness: 0.7 });
+            const cylinderBaseMat = new THREE.MeshStandardMaterial({ color: 0xFBBF24, side: THREE.DoubleSide, roughness: 0.7 });
+
+            // Membuat rentengan sisi tegak (lateral faces)
+            let previousPivot = mainGroup;
+            for (let i = 0; i < n; i++) {
+                const pivot = new THREE.Group();
+                
+                if (i === 0) {
+                    mainGroup.add(pivot);
+                } else {
+                    pivot.position.set(s, 0, 0); // Sambungkan ke ujung kanan sisi sebelumnya
+                    previousPivot.add(pivot);
+                }
+
+                // Plane Geometry untuk satu sisi segi empat
+                const planeGeo = new THREE.PlaneGeometry(s, h);
+                // Geser geometri ke kanan sehingga poros berada di sisi kiri (X=0)
+                planeGeo.translate(s / 2, 0, 0); 
+                
+                const mat = (type === 'tabung') ? cylinderBodyMat : materials[i % materials.length];
+                const mesh = new THREE.Mesh(planeGeo, mat);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                pivot.add(mesh);
+
+                // Menambahkan garis tepi (outline) agar bentuk jaring lebih jelas
+                if (type !== 'tabung') {
+                    const edgesGeo = new THREE.EdgesGeometry(planeGeo);
+                    const edgesMat = new THREE.LineBasicMaterial({ color: 0x1e293b, linewidth: 2 });
+                    const edges = new THREE.LineSegments(edgesGeo, edgesMat);
+                    pivot.add(edges);
+                } else {
+                    // Untuk tabung, hanya gambar garis batas atas dan bawah (agar terlihat seperti satu lembar)
+                    const edgeMat = new THREE.LineBasicMaterial({ color: 0x0ea5e9, linewidth: 2 });
+                    const topGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, h/2, 0.01), new THREE.Vector3(s, h/2, 0.01)]);
+                    const botGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -h/2, 0.01), new THREE.Vector3(s, -h/2, 0.01)]);
+                    pivot.add(new THREE.LineSegments(topGeo, edgeMat));
+                    pivot.add(new THREE.LineSegments(botGeo, edgeMat));
+                    
+                    // Garis penutup kiri/kanan pada lembar selimut tabung
+                    if (i === 0) {
+                        const leftGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, h/2, 0.01), new THREE.Vector3(0, -h/2, 0.01)]);
+                        pivot.add(new THREE.LineSegments(leftGeo, edgeMat));
+                    }
+                    if (i === n - 1) {
+                        const rightGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(s, h/2, 0.01), new THREE.Vector3(s, -h/2, 0.01)]);
+                        pivot.add(new THREE.LineSegments(rightGeo, edgeMat));
+                    }
+                }
+
+                if (i > 0) lateralPivots.push(pivot);
+                previousPivot = pivot;
+
+                // --- MENAMBAHKAN TUTUP DAN ALAS PADA SISI PERTAMA ---
+                if (i === 0) {
+                    let topGeo, botGeo;
+                    
+                    if (type === 'tabung') {
+                        // Gunakan lingkaran sempurna untuk tabung
+                        topGeo = new THREE.CircleGeometry(r, 64);
+                        topGeo.translate(0, r, 0); // Atur posisi poros lipat
+                        botGeo = new THREE.CircleGeometry(r, 64);
+                        botGeo.translate(0, -r, 0); 
+                    } else {
+                        // Gunakan poligon untuk prisma
+                        const baseShape = createBaseShape(n, r);
+                        topGeo = new THREE.ShapeGeometry(baseShape);
+                        topGeo.translate(0, a, 0); 
+                        
+                        botGeo = new THREE.ShapeGeometry(baseShape);
+                        botGeo.rotateZ(Math.PI); // Balik untuk alas bawah
+                        botGeo.translate(0, -a, 0);
+                    }
+
+                    // Poros Tutup (Atas)
+                    topPivot = new THREE.Group();
+                    topPivot.position.set(s / 2, h / 2, 0); // Posisikan di tengah tepi atas Sisi 0
+                    const topMesh = new THREE.Mesh(topGeo, (type === 'tabung') ? cylinderBaseMat : materials[materials.length - 1]);
+                    topMesh.castShadow = true;
+                    topMesh.receiveShadow = true;
+                    topPivot.add(topMesh);
+                    
+                    // Garis pinggir tutup
+                    const topEdges = new THREE.LineSegments(new THREE.EdgesGeometry(topGeo), new THREE.LineBasicMaterial({ color: 0x1e293b }));
+                    if(type === 'tabung') topEdges.material.color.setHex(0xb45309);
+                    topPivot.add(topEdges);
+                    
+                    pivot.add(topPivot);
+
+                    // Poros Alas (Bawah)
+                    bottomPivot = new THREE.Group();
+                    bottomPivot.position.set(s / 2, -h / 2, 0); // Posisikan di tengah tepi bawah Sisi 0
+                    const botMesh = new THREE.Mesh(botGeo, (type === 'tabung') ? cylinderBaseMat : materials[materials.length - 2]);
+                    botMesh.castShadow = true;
+                    botMesh.receiveShadow = true;
+                    bottomPivot.add(botMesh);
+                    
+                    // Garis pinggir alas
+                    const botEdges = new THREE.LineSegments(new THREE.EdgesGeometry(botGeo), new THREE.LineBasicMaterial({ color: 0x1e293b }));
+                    if(type === 'tabung') botEdges.material.color.setHex(0xb45309);
+                    bottomPivot.add(botEdges);
+
+                    pivot.add(bottomPivot);
+                }
+            }
+
+            // Posisikan jaring-jaring agar berada tepat di tengah layar saat terbentang
+            const totalWidth = n * s;
+            mainGroup.position.x = -totalWidth / 2;
+            
+            scene.add(mainGroup);
+            applyFold(foldProgress); // Pastikan posisi sesuai slider
+        }
+
+        // --- FUNGSI MENGATUR LIPATAN ---
+        function applyFold(progress) {
+            // progress: 0 (Terbentang) sampai 1 (Melipat Sempurna)
+            const n = currentGeometryParams.n;
+            
+            // Memainkan efek suara lipatan setiap ada perubahan sebesar ~3%
+            // Ini membuat suara terasa seperti gigi roda / resleting ("krek krek krek")
+            if (Math.abs(progress - lastFoldProgress) >= 0.03) {
+                playSound('lipat', progress);
+                lastFoldProgress = progress;
+            }
+            
+            // Sudut lipatan sisi tegak (Sudut luar poligon)
+            const lateralAngle = progress * (2 * Math.PI / n);
+            
+            // Melipat setiap sisi tegak (menggulung)
+            lateralPivots.forEach(pivot => {
+                pivot.rotation.y = -lateralAngle; 
+            });
+
+            // Sudut lipatan alas dan tutup (Selalu 90 derajat atau PI/2)
+            const capAngle = progress * (Math.PI / 2);
+            if (topPivot) topPivot.rotation.x = capAngle;
+            if (bottomPivot) bottomPivot.rotation.x = -capAngle;
+
+            // Update teks presentase
+            percentageText.textContent = formatPercentage(progress);
+        }
+
+        // --- LOOP ANIMASI UTAMA ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Logika Auto-Play
+            if (isAutoPlaying) {
+                // Kecepatan melipat
+                foldProgress += 0.006 * autoPlayDirection;
+                
+                // Balik arah jika mencapai batas
+                if (foldProgress >= 1) {
+                    foldProgress = 1;
+                    autoPlayDirection = -1; // Mulai membuka
+                    // Jeda sebentar saat tertutup sempurna
+                    isAutoPlaying = false;
+                    setTimeout(() => { isAutoPlaying = true; }, 1000);
+                } else if (foldProgress <= 0) {
+                    foldProgress = 0;
+                    autoPlayDirection = 1; // Mulai melipat
+                    // Jeda sebentar saat terbuka sempurna
+                    isAutoPlaying = false;
+                    setTimeout(() => { isAutoPlaying = true; }, 1000);
+                }
+                
+                // Update slider UI dan bentukan 3D
+                slider.value = foldProgress;
+                applyFold(foldProgress);
+            }
+
+            // Update kontrol kamera
+            controls.update();
+
+            // Render 3D
+            renderer.render(scene, camera);
+        }
+
+        // --- LOGIKA HALAMAN COVER ---
+        const enterBtn = document.getElementById('enter-lab-btn');
+        const coverPage = document.getElementById('cover-page');
+
+        enterBtn.addEventListener('click', () => {
+            // Inisialisasi audio saat interaksi pertama dan mainkan suara sambutan
+            initAudio();
+            playSound('masuk');
+
+            // Berikan efek transisi memudar
+            coverPage.style.opacity = '0';
+            coverPage.style.pointerEvents = 'none'; // Langsung nonaktifkan agar tak sengaja tersentuh
+            
+            // Hapus elemen sepenuhnya setelah animasi selesai
+            setTimeout(() => {
+                coverPage.remove();
+            }, 700);
+        });
+
+        // Jalankan saat dokumen dimuat
+        window.onload = () => {
+            initUI();
+            initThree();
+        };
+    </script>
+</body>
+</html>
