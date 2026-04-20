@@ -93,50 +93,50 @@
 <body class="flex flex-col-reverse md:flex-row h-[100dvh] w-screen overflow-hidden bg-slate-50 font-sans text-slate-800 selection:bg-indigo-200">
     
     <!-- ================= COVER PAGE ================= -->
-    <div id="cover-page" class="fixed inset-0 z-50 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-700">
-        <!-- Elemen Dekoratif Mengambang -->
-        <div class="absolute top-10 left-10 md:top-20 md:left-20 text-6xl md:text-8xl opacity-30 animate-float-slow">🔺</div>
-        <div class="absolute bottom-20 left-10 md:bottom-32 md:left-32 text-6xl md:text-8xl opacity-30 animate-float-fast">📦</div>
-        <div class="absolute top-20 right-10 md:top-32 md:right-32 text-6xl md:text-9xl opacity-30 animate-float-slow" style="animation-delay: 1s;">🛢️</div>
-        <div class="absolute bottom-10 right-10 md:bottom-20 md:right-20 text-6xl md:text-8xl opacity-30 animate-float-fast" style="animation-delay: 0.5s;">⭐</div>
+    <div id="cover-page" class="fixed inset-0 z-50 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden transition-opacity duration-700 py-6 md:py-10">
+        <!-- Elemen Dekoratif Mengambang (Diperkecil agar tidak menutupi layar pendek) -->
+        <div class="absolute top-5 left-5 md:top-10 md:left-10 text-4xl md:text-6xl lg:text-7xl opacity-30 animate-float-slow">🔺</div>
+        <div class="absolute bottom-10 left-5 md:bottom-20 md:left-20 text-5xl md:text-6xl lg:text-7xl opacity-30 animate-float-fast">📦</div>
+        <div class="absolute top-10 right-5 md:top-20 md:right-20 text-6xl md:text-8xl lg:text-9xl opacity-30 animate-float-slow" style="animation-delay: 1s;">🛢️</div>
+        <div class="absolute bottom-5 right-5 md:bottom-10 md:right-10 text-4xl md:text-6xl lg:text-7xl opacity-30 animate-float-fast" style="animation-delay: 0.5s;">⭐</div>
         
         <!-- Konten Utama Cover -->
-        <div class="relative z-10 text-center px-4 flex flex-col items-center w-full max-w-5xl">
+        <div class="relative z-10 text-center px-4 flex flex-col items-center w-full max-w-5xl my-auto">
             
             <!-- Judul -->
-            <h1 class="text-6xl md:text-8xl 2xl:text-[10rem] font-black text-white mb-2 drop-shadow-[0_5px_5px_rgba(0,0,0,0.4)] tracking-tight">
+            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white mb-2 md:mb-4 drop-shadow-[0_5px_5px_rgba(0,0,0,0.4)] tracking-tight leading-none">
                 <span class="text-yellow-300">GEO</span>LAB <span class="text-cyan-300">PRIMA</span>
             </h1>
-            <p class="text-lg md:text-2xl 2xl:text-4xl text-white/90 font-bold mb-8 md:mb-12 drop-shadow-md bg-black/10 px-6 py-2 rounded-full backdrop-blur-sm border border-white/10">
+            <p class="text-xs sm:text-sm md:text-lg lg:text-2xl text-white/90 font-bold mb-6 md:mb-10 drop-shadow-md bg-black/10 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full backdrop-blur-sm border border-white/10">
                 Laboratorium Jaring-Jaring Bangun Ruang
             </p>
             
-            <!-- Ilustrasi Bangun Ruang (Prisma & Tabung) -->
-            <div class="flex justify-center items-end gap-3 md:gap-8 mb-10 md:mb-16 w-full">
-                <div class="w-20 h-20 md:w-32 md:h-32 2xl:w-40 2xl:h-40 bg-white/20 backdrop-blur-md rounded-2xl border-4 border-white/50 flex items-center justify-center text-4xl md:text-6xl 2xl:text-8xl shadow-2xl transform -rotate-12 hover:rotate-0 hover:scale-110 transition-all cursor-default">🔺</div>
-                <div class="w-24 h-24 md:w-40 md:h-40 2xl:w-48 2xl:h-48 bg-white/20 backdrop-blur-md rounded-full border-4 border-white/50 flex items-center justify-center text-5xl md:text-8xl 2xl:text-9xl shadow-2xl transform hover:-translate-y-4 hover:scale-110 transition-all cursor-default z-10">🛢️</div>
-                <div class="w-20 h-20 md:w-32 md:h-32 2xl:w-40 2xl:h-40 bg-white/20 backdrop-blur-md rounded-2xl border-4 border-white/50 flex items-center justify-center text-4xl md:text-6xl 2xl:text-8xl shadow-2xl transform rotate-12 hover:rotate-0 hover:scale-110 transition-all cursor-default">📦</div>
+            <!-- Ilustrasi Bangun Ruang (Prisma & Tabung) - Ukuran dioptimalkan -->
+            <div class="flex justify-center items-end gap-3 md:gap-6 mb-8 md:mb-10 w-full">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-white/20 backdrop-blur-md rounded-2xl border-2 sm:border-4 border-white/50 flex items-center justify-center text-3xl sm:text-4xl md:text-6xl lg:text-7xl shadow-2xl transform -rotate-12 hover:rotate-0 hover:scale-110 transition-all cursor-default">🔺</div>
+                <div class="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-white/20 backdrop-blur-md rounded-full border-2 sm:border-4 border-white/50 flex items-center justify-center text-4xl sm:text-5xl md:text-7xl lg:text-8xl shadow-2xl transform hover:-translate-y-4 hover:scale-110 transition-all cursor-default z-10">🛢️</div>
+                <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-white/20 backdrop-blur-md rounded-2xl border-2 sm:border-4 border-white/50 flex items-center justify-center text-3xl sm:text-4xl md:text-6xl lg:text-7xl shadow-2xl transform rotate-12 hover:rotate-0 hover:scale-110 transition-all cursor-default">📦</div>
             </div>
 
             <!-- Pembuat -->
-            <div class="mb-6 md:mb-12 inline-block bg-black/25 backdrop-blur-sm px-6 md:px-8 py-3 rounded-full border border-white/20 shadow-lg">
-                <p class="text-white text-sm md:text-xl 2xl:text-3xl font-medium tracking-wide">
+            <div class="mb-6 md:mb-10 inline-block bg-black/25 backdrop-blur-sm px-4 py-2 sm:px-6 md:px-8 md:py-3 rounded-full border border-white/20 shadow-lg">
+                <p class="text-white text-xs sm:text-sm md:text-lg lg:text-xl font-medium tracking-wide">
                     created by: <span class="font-bold text-yellow-300">Theresia Sri Rahayu</span>
                 </p>
             </div>
 
             <!-- Tombol Masuk -->
-            <button id="enter-lab-btn" class="group relative px-8 py-4 md:px-12 md:py-5 2xl:px-16 2xl:py-6 bg-white text-purple-600 font-black text-xl md:text-3xl 2xl:text-5xl rounded-full overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,255,255,0.4)] hover:-translate-y-2 active:translate-y-1 transition-all duration-300 transform scale-100 hover:scale-105">
+            <button id="enter-lab-btn" class="group relative px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 lg:px-12 lg:py-5 bg-white text-purple-600 font-black text-lg sm:text-xl md:text-2xl lg:text-3xl rounded-full overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_15px_40px_rgba(255,255,255,0.4)] hover:-translate-y-2 active:translate-y-1 transition-all duration-300 transform scale-100 hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-r from-yellow-300 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                <span id="btn-text" class="relative flex items-center gap-3">
+                <span id="btn-text" class="relative flex items-center gap-2 sm:gap-3">
                     <span class="group-hover:animate-bounce">🚀</span> Masuk Lab Sekarang!
                 </span>
             </button>
 
             <!-- Penghitung Pengunjung (Visitor Counter) -->
-            <div class="mt-6 md:mt-8 bg-black/20 backdrop-blur-sm px-6 py-2.5 rounded-full border border-white/10 flex items-center gap-3 shadow-inner">
-                <span class="text-xl md:text-2xl">👀</span>
-                <span class="text-white text-sm md:text-base 2xl:text-xl font-medium tracking-wide">Total Pengunjung Lab: <span id="visitor-count" class="font-black text-yellow-300 text-lg md:text-xl 2xl:text-2xl ml-1">...</span></span>
+            <div class="mt-4 md:mt-6 bg-black/20 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/10 flex items-center gap-2 sm:gap-3 shadow-inner">
+                <span class="text-lg md:text-xl">👀</span>
+                <span class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-medium tracking-wide">Total Pengunjung Lab: <span id="visitor-count" class="font-black text-yellow-300 text-sm sm:text-base md:text-lg lg:text-xl ml-1">...</span></span>
             </div>
         </div>
     </div>
@@ -199,7 +199,11 @@
         <div id="canvas-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         // --- DATA BANGUN RUANG ---
         const shapes = [
             { id: 'segitiga', name: 'Prisma Segitiga', icon: '🔺', color: 'bg-red-500', ring: 'ring-red-400', desc: 'Alas dan tutupnya berbentuk <b>segitiga</b>. Ia memiliki <b>3 sisi tegak</b> berbentuk persegi panjang.' },
@@ -697,26 +701,88 @@
         const coverPage = document.getElementById('cover-page');
         const exitBtn = document.getElementById('exit-btn');
         
-        // --- LOGIKA VISITOR COUNTER ---
-        // Menghitung jumlah klik masuk (disimpan di browser)
-        function initVisitorCounter() {
-            // Menggunakan key baru ('geolab_click_count') agar ter-reset dari nol
-            let visitors = localStorage.getItem('geolab_click_count');
-            if (!visitors) {
-                visitors = 0; // Mulai dari nol
-                localStorage.setItem('geolab_click_count', visitors);
+        // --- LOGIKA VISITOR COUNTER (REAL-TIME CLOUD) ---
+        let db;
+        let auth;
+        let visitorDocRef;
+        let useCloud = false;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'geolab-prima';
+
+        async function initVisitorCounter() {
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    // 1. Inisialisasi Koneksi Cloud
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    
+                    // 2. Autentikasi yang Betul (Menyelesaikan Isu Permission Denied)
+                    const initAuth = async () => {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    };
+
+                    // 3. Menunggu Pengesahan Berjaya
+                    onAuthStateChanged(auth, (user) => {
+                        if (!user) return; // Mencegah akses tanpa kebenaran
+                        useCloud = true;
+
+                        // 4. Tentukan Alamat Dokumen di Cloud
+                        visitorDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'visitors');
+
+                        // 5. Listener Real-Time: Akan automatik mencetus perubahan angka di skrin
+                        onSnapshot(visitorDocRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                document.getElementById('visitor-count').textContent = docSnap.data().count.toLocaleString('id-ID');
+                            } else {
+                                setDoc(visitorDocRef, { count: 0 }); // Buat dokumen jika belum ada
+                                document.getElementById('visitor-count').textContent = "0";
+                            }
+                        }, (error) => {
+                            console.error("Gagal penyegerakan data awan:", error);
+                            fallbackToLocal();
+                        });
+                    });
+
+                    // Melaksanakan fungsi log masuk
+                    await initAuth();
+
+                } else {
+                    fallbackToLocal(); // Jika dijalankan secara luar talian
+                }
+            } catch (error) {
+                console.error("Ralat Awan:", error);
+                fallbackToLocal();
             }
-            
-            // Format angka dan tampilkan (TIDAK ditambah saat halaman dimuat ulang)
+        }
+
+        // Penghitung sokongan jika internet/sistem awan bermasalah
+        function fallbackToLocal() {
+            useCloud = false;
+            let visitors = localStorage.getItem('geolab_click_count') || 0;
+            localStorage.setItem('geolab_click_count', visitors);
             document.getElementById('visitor-count').textContent = parseInt(visitors).toLocaleString('id-ID');
         }
 
-        enterBtn.addEventListener('click', () => {
-            // 1. Tambah jumlah pengunjung HANYA saat tombol ini diklik
-            let currentCount = parseInt(localStorage.getItem('geolab_click_count') || 0);
-            currentCount += 1;
-            localStorage.setItem('geolab_click_count', currentCount);
-            document.getElementById('visitor-count').textContent = currentCount.toLocaleString('id-ID');
+        enterBtn.addEventListener('click', async () => {
+            // 1. Tambah jumlah pengunjung secara Real-Time ke Cloud
+            if (useCloud && visitorDocRef) {
+                try {
+                    const docSnap = await getDoc(visitorDocRef);
+                    let currentCount = docSnap.exists() ? docSnap.data().count : 0;
+                    await setDoc(visitorDocRef, { count: currentCount + 1 });
+                } catch (error) {
+                    console.error("Gagal menambah data awan:", error);
+                }
+            } else {
+                let currentCount = parseInt(localStorage.getItem('geolab_click_count') || 0) + 1;
+                localStorage.setItem('geolab_click_count', currentCount);
+                document.getElementById('visitor-count').textContent = currentCount.toLocaleString('id-ID');
+            }
 
             // 2. Inisialisasi audio saat interaksi pertama
             initAudio();
@@ -751,8 +817,8 @@
                 coverPage.style.opacity = '1';
                 coverPage.style.pointerEvents = 'auto';
                 
-                // Update tampilan angka pengunjung agar selalu yang terbaru
-                initVisitorCounter();
+                // Kemas kini paparan angka pengunjung supaya sentiasa yang terkini
+                if (!useCloud) fallbackToLocal();
             }, 50);
         });
 
