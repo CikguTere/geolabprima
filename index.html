@@ -207,7 +207,8 @@
         // --- DATA BANGUN RUANG ---
         const shapes = [
             { id: 'segitiga', name: 'Prisma Segitiga', icon: '🔺', color: 'bg-red-500', ring: 'ring-red-400', desc: 'Alas dan tutupnya berbentuk <b>segitiga</b>. Ia memiliki <b>3 sisi tegak</b> berbentuk persegi panjang.' },
-            { id: 'segiempat', name: 'Prisma Segi Empat (Balok)', icon: '📦', color: 'bg-amber-500', ring: 'ring-amber-400', desc: 'Sering disebut Balok. Tersusun dari <b>6 sisi persegi panjang</b> dimana sisi yang berhadapan ukurannya sama besar!' },
+            { id: 'kubus', name: 'Kubus', icon: '🎲', color: 'bg-amber-500', ring: 'ring-amber-400', desc: 'Tersusun dari <b>6 buah persegi</b> yang ukurannya persis sama besar. Semua sisinya sama panjang!' },
+            { id: 'balok', name: 'Balok', icon: '📦', color: 'bg-orange-500', ring: 'ring-orange-400', desc: 'Tersusun dari <b>6 sisi persegi panjang</b>, di mana sisi-sisi yang berhadapan memiliki ukuran yang sama persis.' },
             { id: 'segilima', name: 'Prisma Segi Lima', icon: '⭐', color: 'bg-green-500', ring: 'ring-green-400', desc: 'Alas dan tutupnya berbentuk <b>segi lima</b>. Ia dikelilingi oleh <b>5 sisi tegak</b> berbentuk persegi panjang.' },
             { id: 'segienam', name: 'Prisma Segi Enam', icon: '🛑', color: 'bg-blue-500', ring: 'ring-blue-400', desc: 'Alas dan tutupnya berbentuk <b>segi enam</b>. Ia dikelilingi oleh <b>6 sisi tegak</b> berbentuk persegi panjang.' },
             { id: 'tabung', name: 'Tabung', icon: '🛢️', color: 'bg-purple-500', ring: 'ring-purple-400', desc: 'Alas dan tutupnya berupa <b>lingkaran</b>. Selimutnya melengkung, tapi kalau dibentangkan menjadi <b>persegi panjang</b>!' }
@@ -483,10 +484,12 @@
             let n = 3; // Jumlah sisi
             let r = 2.5; // Jari-jari alas
             let h = 5; // Tinggi prisma
+            let faceWidths = []; // Array untuk menampung lebar masing-masing sisi tegak
 
             switch (type) {
                 case 'segitiga': n = 3; r = 2.8; h = 6; break;
-                case 'segiempat': n = 4; r = Math.sqrt(8); h = 4; break; // Membentuk balok/kubus (sisi=4)
+                case 'kubus': n = 4; r = 0; h = 4; break; // Kubus (semua sisi ukurannya 4)
+                case 'balok': n = 4; r = 0; h = 4; break; // Balok (punya p, l, t yang berbeda)
                 case 'segilima': n = 5; r = 2.2; h = 5; break;
                 case 'segienam': n = 6; r = 2.0; h = 5; break;
                 case 'tabung': n = 32; r = 2.0; h = 6; break; // Tabung dilunakkan menjadi 32 segi
@@ -494,15 +497,18 @@
 
             currentGeometryParams.n = n;
 
-            // Kalkulasi matematika bentuk
-            // Lebar satu sisi (s) dan jarak dari pusat ke sisi (apotema/a)
-            let s = 2 * r * Math.sin(Math.PI / n);
-            let a = r * Math.cos(Math.PI / n);
-
-            // Modifikasi khusus tabung agar keliling melingkar sempurna
+            // Kalkulasi matematika bentuk (Menghitung lebar masing-masing lembaran jaring)
             if (type === 'tabung') {
-                s = (2 * Math.PI * r) / n;
-                a = r;
+                const s = (2 * Math.PI * r) / n;
+                faceWidths = Array(n).fill(s);
+            } else if (type === 'kubus') {
+                faceWidths = [4, 4, 4, 4]; // 4 sisi persegi yang sama besar
+            } else if (type === 'balok') {
+                faceWidths = [5, 3, 5, 3]; // Persegi panjang yang selang-seling (p=5, l=3)
+            } else {
+                // Untuk poligon beraturan standar (segitiga, segilima, segienam)
+                const s = 2 * r * Math.sin(Math.PI / n);
+                faceWidths = Array(n).fill(s);
             }
 
             // Material dengan flat shading untuk tampilan seperti kertas
@@ -522,19 +528,20 @@
             // Membuat rentengan sisi tegak (lateral faces)
             let previousPivot = mainGroup;
             for (let i = 0; i < n; i++) {
+                const currentS = faceWidths[i]; // Ambil lebar untuk sisi ke-i
                 const pivot = new THREE.Group();
                 
                 if (i === 0) {
                     mainGroup.add(pivot);
                 } else {
-                    pivot.position.set(s, 0, 0); // Sambungkan ke ujung kanan sisi sebelumnya
+                    pivot.position.set(faceWidths[i-1], 0, 0); // Sambungkan ke ujung kanan sisi sebelumnya
                     previousPivot.add(pivot);
                 }
 
-                // Plane Geometry untuk satu sisi segi empat
-                const planeGeo = new THREE.PlaneGeometry(s, h);
+                // Plane Geometry untuk satu sisi tegak
+                const planeGeo = new THREE.PlaneGeometry(currentS, h);
                 // Geser geometri ke kanan sehingga poros berada di sisi kiri (X=0)
-                planeGeo.translate(s / 2, 0, 0); 
+                planeGeo.translate(currentS / 2, 0, 0); 
                 
                 const mat = (type === 'tabung') ? cylinderBodyMat : materials[i % materials.length];
                 const mesh = new THREE.Mesh(planeGeo, mat);
@@ -551,8 +558,8 @@
                 } else {
                     // Untuk tabung, hanya gambar garis batas atas dan bawah (agar terlihat seperti satu lembar)
                     const edgeMat = new THREE.LineBasicMaterial({ color: 0x0ea5e9, linewidth: 2 });
-                    const topGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, h/2, 0.01), new THREE.Vector3(s, h/2, 0.01)]);
-                    const botGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -h/2, 0.01), new THREE.Vector3(s, -h/2, 0.01)]);
+                    const topGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, h/2, 0.01), new THREE.Vector3(currentS, h/2, 0.01)]);
+                    const botGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -h/2, 0.01), new THREE.Vector3(currentS, -h/2, 0.01)]);
                     pivot.add(new THREE.LineSegments(topGeo, edgeMat));
                     pivot.add(new THREE.LineSegments(botGeo, edgeMat));
                     
@@ -562,7 +569,7 @@
                         pivot.add(new THREE.LineSegments(leftGeo, edgeMat));
                     }
                     if (i === n - 1) {
-                        const rightGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(s, h/2, 0.01), new THREE.Vector3(s, -h/2, 0.01)]);
+                        const rightGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(currentS, h/2, 0.01), new THREE.Vector3(currentS, -h/2, 0.01)]);
                         pivot.add(new THREE.LineSegments(rightGeo, edgeMat));
                     }
                 }
@@ -580,9 +587,21 @@
                         topGeo.translate(0, r, 0); // Atur posisi poros lipat
                         botGeo = new THREE.CircleGeometry(r, 64);
                         botGeo.translate(0, -r, 0); 
+                    } else if (type === 'kubus' || type === 'balok') {
+                        // Gunakan PlaneGeometry yang akurat untuk tutup dan alas segi empat
+                        const p = faceWidths[0];
+                        const l = faceWidths[1];
+                        
+                        topGeo = new THREE.PlaneGeometry(p, l);
+                        topGeo.translate(0, l/2, 0); 
+                        
+                        botGeo = new THREE.PlaneGeometry(p, l);
+                        botGeo.translate(0, -l/2, 0);
                     } else {
-                        // Gunakan poligon untuk prisma
+                        // Gunakan poligon untuk prisma beraturan lainnya
                         const baseShape = createBaseShape(n, r);
+                        const a = r * Math.cos(Math.PI / n);
+                        
                         topGeo = new THREE.ShapeGeometry(baseShape);
                         topGeo.translate(0, a, 0); 
                         
@@ -593,7 +612,7 @@
 
                     // Poros Tutup (Atas)
                     topPivot = new THREE.Group();
-                    topPivot.position.set(s / 2, h / 2, 0); // Posisikan di tengah tepi atas Sisi 0
+                    topPivot.position.set(currentS / 2, h / 2, 0); // Posisikan di tengah tepi atas Sisi 0
                     const topMesh = new THREE.Mesh(topGeo, (type === 'tabung') ? cylinderBaseMat : materials[materials.length - 1]);
                     topMesh.castShadow = true;
                     topMesh.receiveShadow = true;
@@ -608,7 +627,7 @@
 
                     // Poros Alas (Bawah)
                     bottomPivot = new THREE.Group();
-                    bottomPivot.position.set(s / 2, -h / 2, 0); // Posisikan di tengah tepi bawah Sisi 0
+                    bottomPivot.position.set(currentS / 2, -h / 2, 0); // Posisikan di tengah tepi bawah Sisi 0
                     const botMesh = new THREE.Mesh(botGeo, (type === 'tabung') ? cylinderBaseMat : materials[materials.length - 2]);
                     botMesh.castShadow = true;
                     botMesh.receiveShadow = true;
@@ -624,7 +643,7 @@
             }
 
             // Posisikan jaring-jaring agar berada tepat di tengah layar saat terbentang
-            const totalWidth = n * s;
+            const totalWidth = faceWidths.reduce((sum, width) => sum + width, 0);
             mainGroup.position.x = -totalWidth / 2;
             
             scene.add(mainGroup);
@@ -715,7 +734,7 @@
                     const app = initializeApp(firebaseConfig);
                     auth = getAuth(app);
                     db = getFirestore(app);
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'geolab-prima-app';
                     
                     // 2. Autentikasi Rahasia (Wajib Tunggu Hingga Selesai Dulu!)
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -732,8 +751,8 @@
                     
                     useCloud = true;
 
-                    // 4. Tentukan Alamat Dokumen di Cloud
-                    visitorDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'visitors');
+                    // 4. Tentukan Alamat Dokumen di Cloud secara spesifik
+                    visitorDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'geolab_stats', 'visitors_counter');
 
                     // 5. Listener Real-Time: Akan automatik mencetus perubahan angka di skrin
                     onSnapshot(visitorDocRef, (docSnap) => {
@@ -765,15 +784,11 @@
         }
 
         enterBtn.addEventListener('click', async () => {
-            // 1. Tambah jumlah pengunjung secara Real-Time ke Cloud dengan fitur 'increment' (Anti-tabrakan)
+            // 1. Tambah jumlah pengunjung secara Real-Time ke Cloud dengan teknik Merge (Paling Selamat)
             if (useCloud && visitorDocRef && auth.currentUser) {
                 try {
-                    const docSnap = await getDoc(visitorDocRef);
-                    if (docSnap.exists()) {
-                        await updateDoc(visitorDocRef, { count: increment(1) });
-                    } else {
-                        await setDoc(visitorDocRef, { count: 1 });
-                    }
+                    // Menggabungkan (merge) memastikan tiada ralat walaupun pelbagai peranti klik serentak
+                    await setDoc(visitorDocRef, { count: increment(1) }, { merge: true });
                 } catch (error) {
                     console.error("Gagal menambah data awan:", error);
                 }
