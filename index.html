@@ -201,8 +201,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- DATA BANGUN RUANG ---
         const shapes = [
@@ -706,7 +706,6 @@
         let auth;
         let visitorDocRef;
         let useCloud = false;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'geolab-prima';
 
         async function initVisitorCounter() {
             try {
@@ -716,40 +715,37 @@
                     const app = initializeApp(firebaseConfig);
                     auth = getAuth(app);
                     db = getFirestore(app);
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                     
-                    // 2. Autentikasi yang Betul (Menyelesaikan Isu Permission Denied)
-                    const initAuth = async () => {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
+                    // 2. Autentikasi Rahasia (Wajib Tunggu Hingga Selesai Dulu!)
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    // 3. Pastikan pengguna sudah log masuk sebelum mengakses data
+                    if (!auth.currentUser) {
+                        fallbackToLocal();
+                        return;
+                    }
+                    
+                    useCloud = true;
+
+                    // 4. Tentukan Alamat Dokumen di Cloud
+                    visitorDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'visitors');
+
+                    // 5. Listener Real-Time: Akan automatik mencetus perubahan angka di skrin
+                    onSnapshot(visitorDocRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            document.getElementById('visitor-count').textContent = docSnap.data().count.toLocaleString('id-ID');
                         } else {
-                            await signInAnonymously(auth);
+                            document.getElementById('visitor-count').textContent = "0";
                         }
-                    };
-
-                    // 3. Menunggu Pengesahan Berjaya
-                    onAuthStateChanged(auth, (user) => {
-                        if (!user) return; // Mencegah akses tanpa kebenaran
-                        useCloud = true;
-
-                        // 4. Tentukan Alamat Dokumen di Cloud
-                        visitorDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'visitors');
-
-                        // 5. Listener Real-Time: Akan automatik mencetus perubahan angka di skrin
-                        onSnapshot(visitorDocRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                document.getElementById('visitor-count').textContent = docSnap.data().count.toLocaleString('id-ID');
-                            } else {
-                                setDoc(visitorDocRef, { count: 0 }); // Buat dokumen jika belum ada
-                                document.getElementById('visitor-count').textContent = "0";
-                            }
-                        }, (error) => {
-                            console.error("Gagal penyegerakan data awan:", error);
-                            fallbackToLocal();
-                        });
+                    }, (error) => {
+                        console.error("Gagal penyegerakan data awan:", error);
+                        fallbackToLocal();
                     });
-
-                    // Melaksanakan fungsi log masuk
-                    await initAuth();
 
                 } else {
                     fallbackToLocal(); // Jika dijalankan secara luar talian
@@ -769,12 +765,15 @@
         }
 
         enterBtn.addEventListener('click', async () => {
-            // 1. Tambah jumlah pengunjung secara Real-Time ke Cloud
-            if (useCloud && visitorDocRef) {
+            // 1. Tambah jumlah pengunjung secara Real-Time ke Cloud dengan fitur 'increment' (Anti-tabrakan)
+            if (useCloud && visitorDocRef && auth.currentUser) {
                 try {
                     const docSnap = await getDoc(visitorDocRef);
-                    let currentCount = docSnap.exists() ? docSnap.data().count : 0;
-                    await setDoc(visitorDocRef, { count: currentCount + 1 });
+                    if (docSnap.exists()) {
+                        await updateDoc(visitorDocRef, { count: increment(1) });
+                    } else {
+                        await setDoc(visitorDocRef, { count: 1 });
+                    }
                 } catch (error) {
                     console.error("Gagal menambah data awan:", error);
                 }
